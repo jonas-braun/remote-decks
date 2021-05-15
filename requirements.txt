@@ -1,0 +1,5 @@
+aio_pika
+PyQt5
+soundfile
+sounddevice
+samplerate
