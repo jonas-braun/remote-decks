@@ -49,3 +49,6 @@ class Player:
 
     def play(self):
         self.stream.start()
+
+    def pause(self):
+        self.stream.stop()  # TODO resync

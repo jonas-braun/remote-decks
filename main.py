@@ -10,9 +10,11 @@ import threading
 from PyQt5 import QtCore, QtWidgets
 from asyncqt import QEventLoop
 
+from events import EventBus
+
 
 class Ui(QtWidgets.QWidget):
-    sendData = QtCore.pyqtSignal(str)
+    play_pause = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,13 +26,20 @@ class Ui(QtWidgets.QWidget):
 
         self.play_button = QtWidgets.QPushButton('Play')
         self.play_button.setCheckable(True)
-        # self.play_button.clicked.connect(self.button_clicked)
+        self.play_button.clicked.connect(self.play_button_clicked)
         layout.addWidget(self.play_button)
 
         self.tempo_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.tempo_slider.setMinimum(-8)
         self.tempo_slider.setMaximum(+8)
         layout.addWidget(self.tempo_slider)
+        
+    @QtCore.pyqtSlot()
+    def play_button_clicked(self):
+        if self.play_button.isChecked():
+            self.play_pause.emit(True)
+        else:
+            self.play_pause.emit(False)
 
 
 class Engine(threading.Thread):
@@ -64,21 +73,55 @@ class Engine(threading.Thread):
         self.player_1.play()
 
 
+    def pause(self):
+
+        self.player_1.pause()
+
+
 class Controller(QtCore.QObject):
 
-    def __init__(self, engine):
+    def __init__(self, loop, engine):
 
+        super().__init__()
+
+        self.loop = loop
         self.engine = engine
+
+        self.event_bus = EventBus(loop, self)
 
         self.ui = Ui()
         self.ui.show()
 
-        self.engine.play()
+        self.ui.play_pause.connect(self.play_pause_clicked)
+
 
     @QtCore.pyqtSlot(bool)
     def play_pause_clicked(self, value):
 
+        if value is True:
+            self.engine.play()
+            self.send_play()
+        else:
+            self.engine.pause()
+
         print(value)
+
+
+    def send_play(self):
+        self.event_bus.send_data('PLAY')
+
+    def receive_play(self):
+        self.ui.play_button.setChecked(True)
+        self.engine.play()
+
+
+
+    def receive(self, msg):
+
+        print('RECEIVED', msg)
+        if msg == 'PLAY':
+            self.receive_play()
+
 
 
 def main():
@@ -89,7 +132,7 @@ def main():
 
     engine = Engine()
 
-    controller = Controller(engine)
+    controller = Controller(loop, engine)
     
     with loop:
 
