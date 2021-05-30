@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 import soundfile as sf
 import sounddevice as sd
 
@@ -16,11 +18,13 @@ class Player:
         self.volume = 1
         self.tempo = 1
 
+        self.buffer = np.zeros((256, 2), dtype='float32')
+
         self.audio_file = None
         self.stream = sd.OutputStream(
                 samplerate=self.sample_rate,
                 channels=2,
-                blocksize=2048,
+                blocksize=256, #2048,
                 callback=self.callback_closure()
                 )
 
@@ -35,9 +39,11 @@ class Player:
 
             data = self.audio_file.read(frames_to_read, fill_value=0) * self.volume
 
-            data = sr.resample(data, self.tempo, 'sinc_best')
+            data = sr.resample(data, self.tempo, 'sinc_best')[:256]
 
-            outdata[:] = data
+            self.buffer[:data.shape[0], :] = data
+
+            outdata[:] = self.buffer
 
         return callback
 

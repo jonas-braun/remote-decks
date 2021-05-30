@@ -30,8 +30,8 @@ class Ui(QtWidgets.QWidget):
         layout.addWidget(self.play_button)
 
         self.tempo_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.tempo_slider.setMinimum(-8)
-        self.tempo_slider.setMaximum(+8)
+        self.tempo_slider.setMinimum(-255)
+        self.tempo_slider.setMaximum(+255)
         layout.addWidget(self.tempo_slider)
         
     @QtCore.pyqtSlot()
@@ -48,6 +48,7 @@ class Engine(threading.Thread):
         super().__init__()
 
         self.running = False
+        self.tempo_range = (33+8)/33 - 1
 
         self.start()
 
@@ -77,6 +78,10 @@ class Engine(threading.Thread):
 
         self.player_1.pause()
 
+    def change_tempo(self, value):
+        print(value)
+        self.player_1.tempo = 1 - self.tempo_range*value
+
 
 class Controller(QtCore.QObject):
 
@@ -93,6 +98,7 @@ class Controller(QtCore.QObject):
         self.ui.show()
 
         self.ui.play_pause.connect(self.play_pause_clicked)
+        self.ui.tempo_slider.valueChanged.connect(self.tempo_changed)
 
 
     @QtCore.pyqtSlot(bool)
@@ -113,6 +119,11 @@ class Controller(QtCore.QObject):
     def receive_play(self):
         self.ui.play_button.setChecked(True)
         self.engine.play()
+
+
+    @QtCore.pyqtSlot(int)
+    def tempo_changed(self, value):
+        self.engine.change_tempo(value/256)
 
 
 
