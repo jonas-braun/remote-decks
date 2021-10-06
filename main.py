@@ -61,7 +61,7 @@ class Engine(threading.Thread):
         from player import Player
 
         self.player_1 = Player()
-        self.player_1.load_audio_file('test.wav')
+        self.player_1.load_audio_file('data/test.wav')
 
         self.running = True
 
@@ -69,7 +69,7 @@ class Engine(threading.Thread):
             time.sleep(1)
 
 
-    def play(self):
+    def play(self, offset=.0):
 
         self.player_1.play()
 

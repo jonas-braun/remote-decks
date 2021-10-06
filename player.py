@@ -10,6 +10,8 @@ import samplerate as sr
 
 class Player:
 
+    blocksize = 1024
+
     def __init__(self):
 
         self.sample_rate = 44100
@@ -18,13 +20,13 @@ class Player:
         self.volume = 1
         self.tempo = 1
 
-        self.buffer = np.zeros((256, 2), dtype='float32')
+        self.buffer = np.zeros((self.blocksize, 2), dtype='float32')
 
         self.audio_file = None
         self.stream = sd.OutputStream(
                 samplerate=self.sample_rate,
                 channels=2,
-                blocksize=256, #2048,
+                blocksize=self.blocksize,
                 callback=self.callback_closure()
                 )
 
@@ -39,7 +41,7 @@ class Player:
 
             data = self.audio_file.read(frames_to_read, fill_value=0) * self.volume
 
-            data = sr.resample(data, self.tempo, 'sinc_best')[:256]
+            data = sr.resample(data, self.tempo, 'sinc_best')[:self.blocksize]
 
             self.buffer[:data.shape[0], :] = data
 
@@ -54,6 +56,7 @@ class Player:
 
 
     def play(self):
+        # TODO seek
         self.stream.start()
 
     def pause(self):
