@@ -114,11 +114,16 @@ class Controller(QtCore.QObject):
 
 
     def send_play(self):
-        self.event_bus.send_data('PLAY')
+        timestamp = datetime.datetime.now()
+        self.event_bus.send_data(timestamp, 'PLAY')
 
-    def receive_play(self):
+    def receive_play(self, timestamp):
         self.ui.play_button.setChecked(True)
-        self.engine.play()
+
+        offset = datetime.datetime.now().timestamp() - float(timestamp)
+        print('OFFSET', offset)
+
+        self.engine.play(offset)
 
 
     @QtCore.pyqtSlot(int)
@@ -127,11 +132,11 @@ class Controller(QtCore.QObject):
 
 
 
-    def receive(self, msg):
+    def receive(self, timestamp, msg):
 
-        print('RECEIVED', msg)
+        print('RECEIVED', timestamp, msg)
         if msg == 'PLAY':
-            self.receive_play()
+            self.receive_play(timestamp)
 
 
 

@@ -53,15 +53,21 @@ class EventBus:
 
                         if not message.correlation_id == self.user_id:
 
-                            self.controller.receive(message.body.decode())
+                            body = message.body.decode()
+                            timestamp = body[:17]
+                            msg = body[18:]
+
+                            self.controller.receive(timestamp, msg)
 
 
-    def send_data(self, msg):
+    def send_data(self, timestamp, msg):
         print('client send', msg)
+
+        timestamped_message = f'{timestamp.timestamp():9.6f} {msg}' 
 
         if self.exchange:
 
-            asyncio.create_task(self.client_send_data(msg))
+            asyncio.create_task(self.client_send_data(timestamped_message))
 
 
     async def client_send_data(self, msg):
