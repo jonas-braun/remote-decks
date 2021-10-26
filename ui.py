@@ -27,21 +27,14 @@ class TrackList(QtWidgets.QTableWidget):
                 item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 self.setItem(i, j, item)
 
-
-
-class Ui(QtWidgets.QWidget):
+class Deck(QtWidgets.QWidget):
     play_pause = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
 
-        self.setGeometry(300, 300, 800, 600)
-        self.setWindowTitle('Remote Decks')
+        super().__init__()
 
         layout = QtWidgets.QVBoxLayout(self)
-
-        self.track_list = TrackList()
-        layout.addWidget(self.track_list)
 
         self.track_info = QtWidgets.QLabel()
         layout.addWidget(self.track_info)
@@ -55,7 +48,7 @@ class Ui(QtWidgets.QWidget):
         self.tempo_slider.setMinimum(-255)
         self.tempo_slider.setMaximum(+255)
         layout.addWidget(self.tempo_slider)
-        
+
     @QtCore.pyqtSlot()
     def play_button_clicked(self):
         if self.play_button.isChecked():
@@ -64,4 +57,26 @@ class Ui(QtWidgets.QWidget):
             self.play_pause.emit(False)
 
 
+class Ui(QtWidgets.QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setGeometry(300, 300, 800, 600)
+        self.setWindowTitle('Remote Decks')
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        self.track_list = TrackList()
+        layout.addWidget(self.track_list)
+
+        bottom_layout = QtWidgets.QHBoxLayout()
+        self.decks = [
+                Deck(),
+                Deck()
+                ]
+        for deck in self.decks:
+            bottom_layout.addWidget(deck)
+
+        layout.addLayout(bottom_layout)
 

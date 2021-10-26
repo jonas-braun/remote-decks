@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5 import QtCore
 
 from ui import Ui
@@ -19,8 +21,8 @@ class Controller(QtCore.QObject):
         self.ui = Ui()
         self.ui.show()
 
-        self.ui.play_pause.connect(self.play_pause_clicked)
-        self.ui.tempo_slider.valueChanged.connect(self.tempo_changed)
+        self.ui.decks[0].play_pause.connect(self.play_pause_clicked)
+        self.ui.decks[0].tempo_slider.valueChanged.connect(self.tempo_changed)
 
         self.library = Library()
         self.ui.track_list.track_selected.connect(self.load_track)
@@ -70,6 +72,6 @@ class Controller(QtCore.QObject):
     def load_track(self, index):
         track = self.library.get(index)
         self.engine.load_track(0, track)
-        self.ui.track_info.setText(track)
+        self.ui.decks[0].track_info.setText(track)
 
 
