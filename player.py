@@ -8,11 +8,26 @@ import sounddevice as sd
 import samplerate as sr
 
 
+class OutputFile:
+    def __init__(self, samplerate, channels, blocksize, callback):
+        self.output_file = sf.SoundFile('output.wav',
+                mode='w',
+                samplerate=samplerate,
+                channels=channels,
+                format='WAVEX')
+
+
 class Player:
+
+    """
+    The Player represents one input audio file and one audio output.
+    It should run in a separate thread so it can resample audio data without causing a buffer
+    underrun. The output interface is configurable especially for testing purposes.
+    """
 
     blocksize = 1024
 
-    def __init__(self):
+    def __init__(self, ):
 
         self.sample_rate = 44100
 
@@ -55,8 +70,10 @@ class Player:
         self.audio_file = sf.SoundFile(filename)
 
 
-    def play(self):
-        # TODO seek
+    def play(self, offset=None):
+        if offset:
+            pos = int(offset * self.sample_rate)
+            self.audio_file.seek(pos)
         self.stream.start()
 
     def pause(self):

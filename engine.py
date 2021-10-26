@@ -18,26 +18,36 @@ class Engine(threading.Thread):
 
     def run(self):
 
-        from player import Player
-
-        self.player_1 = Player()
-        self.player_1.load_audio_file('data/test.wav')
+        self.players = {}
 
         self.running = True
 
         while True:
             time.sleep(1)
 
+    def load_track(self, deck, filename):
 
-    def play(self, offset=.0):
+        from player import Player
 
-        self.player_1.play()
+        if deck not in self.players:
+            self.players[deck] = Player()
+
+        self.players[deck].load_audio_file(filename)
 
 
-    def pause(self):
+    def play(self, deck, offset=None, timestamp=None):
 
-        self.player_1.pause()
+        if offset is not None and timestamp:
+            offset += time.time() - timestamp
+            print(offset)
 
-    def change_tempo(self, value):
+        self.players[deck].play(offset)
+
+
+    def pause(self, deck):
+
+        self.players[deck].pause()
+
+    def change_tempo(self, deck, value):
         print(value)
-        self.player_1.tempo = 1 - self.tempo_range*value
+        self.players[deck].tempo = 1 - self.tempo_range*value
