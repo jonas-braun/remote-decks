@@ -14,6 +14,35 @@ from events import EventBus
 from engine import Engine
 
 
+class TrackList(QtWidgets.QTableWidget):
+    track_selected = QtCore.pyqtSignal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setColumnCount(2)
+        self.setHorizontalHeaderLabels(['Artist', 'Track'])
+        self.verticalHeader().hide()
+
+        self.setSelectionBehavior(1)
+        self.itemDoubleClicked.connect(self.track_clicked)
+
+    def track_clicked(self, item):
+        row = self.row(item)
+        for i in range(2):
+            item = self.item(row, i)
+            item.setSelected(True)
+        self.track_selected.emit(row)
+
+    def set_track_info(self, data):
+        for i, row in enumerate(data):
+            self.insertRow(i)
+            for j, info in enumerate(row):
+                item = QtWidgets.QTableWidgetItem(info)
+                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                self.setItem(i, j, item)
+
+
 class Ui(QtWidgets.QWidget):
     play_pause = QtCore.pyqtSignal(bool)
 
@@ -24,6 +53,9 @@ class Ui(QtWidgets.QWidget):
         self.setWindowTitle('Remote Decks')
 
         layout = QtWidgets.QVBoxLayout(self)
+
+        self.track_list = TrackList()
+        layout.addWidget(self.track_list)
 
         self.play_button = QtWidgets.QPushButton('Play')
         self.play_button.setCheckable(True)
@@ -59,6 +91,9 @@ class Controller(QtCore.QObject):
 
         self.ui.play_pause.connect(self.play_pause_clicked)
         self.ui.tempo_slider.valueChanged.connect(self.tempo_changed)
+
+        self.ui.track_list.track_selected.connect(self.load_track)
+        self.load_track_list()
 
 
     @QtCore.pyqtSlot(bool)
@@ -97,6 +132,15 @@ class Controller(QtCore.QObject):
         print('RECEIVED', timestamp, msg)
         if msg == 'PLAY':
             self.receive_play(timestamp)
+
+
+    def load_track_list(self):
+        self.ui.track_list.set_track_info([['Demo', '1'], ['Demo', '2']])
+
+    def load_track(self, index):
+        print('Selected', index)
+        pass
+
 
 
 
