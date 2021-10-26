@@ -2,6 +2,7 @@ from PyQt5 import QtCore
 
 from ui import Ui
 from events import EventBus
+from library import Library
 
 
 class Controller(QtCore.QObject):
@@ -21,6 +22,7 @@ class Controller(QtCore.QObject):
         self.ui.play_pause.connect(self.play_pause_clicked)
         self.ui.tempo_slider.valueChanged.connect(self.tempo_changed)
 
+        self.library = Library()
         self.ui.track_list.track_selected.connect(self.load_track)
         self.load_track_list()
 
@@ -29,10 +31,10 @@ class Controller(QtCore.QObject):
     def play_pause_clicked(self, value):
 
         if value is True:
-            self.engine.play()
+            self.engine.play(0)
             self.send_play()
         else:
-            self.engine.pause()
+            self.engine.pause(0)
 
         print(value)
 
@@ -55,7 +57,6 @@ class Controller(QtCore.QObject):
         self.engine.change_tempo(value/256)
 
 
-
     def receive(self, timestamp, msg):
 
         print('RECEIVED', timestamp, msg)
@@ -64,9 +65,11 @@ class Controller(QtCore.QObject):
 
 
     def load_track_list(self):
-        self.ui.track_list.set_track_info([['Demo', '1'], ['Demo', '2']])
+        self.ui.track_list.set_track_info(self.library.get_list())
 
     def load_track(self, index):
-        print('Selected', index)
-        pass
+        track = self.library.get(index)
+        self.engine.load_track(0, track)
+        self.ui.track_info.setText(track)
+
 

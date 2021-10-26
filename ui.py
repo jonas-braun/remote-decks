@@ -8,6 +8,7 @@ class TrackList(QtWidgets.QTableWidget):
         super().__init__(parent)
 
         self.setColumnCount(2)
+        self.setColumnWidth(0, 600)
         self.setHorizontalHeaderLabels(['Artist', 'Track'])
         self.verticalHeader().hide()
 
@@ -16,9 +17,6 @@ class TrackList(QtWidgets.QTableWidget):
 
     def track_clicked(self, item):
         row = self.row(item)
-        for i in range(2):
-            item = self.item(row, i)
-            item.setSelected(True)
         self.track_selected.emit(row)
 
     def set_track_info(self, data):
@@ -28,6 +26,7 @@ class TrackList(QtWidgets.QTableWidget):
                 item = QtWidgets.QTableWidgetItem(info)
                 item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 self.setItem(i, j, item)
+
 
 
 class Ui(QtWidgets.QWidget):
@@ -43,6 +42,9 @@ class Ui(QtWidgets.QWidget):
 
         self.track_list = TrackList()
         layout.addWidget(self.track_list)
+
+        self.track_info = QtWidgets.QLabel()
+        layout.addWidget(self.track_info)
 
         self.play_button = QtWidgets.QPushButton('Play')
         self.play_button.setCheckable(True)
