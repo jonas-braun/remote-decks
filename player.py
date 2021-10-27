@@ -27,13 +27,17 @@ class Player:
 
     blocksize = 1024
 
-    def __init__(self, ):
+    def __init__(self, deck=None):
+
+        self.deck = deck
 
         self.sample_rate = 44100
 
         self.position = -1
         self.volume = 1
         self.tempo = 1
+
+        self.is_playing = False
 
         self.buffer = np.zeros((self.blocksize, 2), dtype='float32')
 
@@ -71,10 +75,12 @@ class Player:
 
 
     def play(self, offset=None):
+        self.is_playing = True
         if offset:
             pos = int(offset * self.sample_rate)
             self.audio_file.seek(pos)
         self.stream.start()
 
     def pause(self):
+        self.is_playing = False
         self.stream.stop()  # TODO resync

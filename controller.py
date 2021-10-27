@@ -22,21 +22,23 @@ class Controller(QtCore.QObject):
         self.ui.show()
 
         self.ui.decks[0].play_pause.connect(self.play_pause_clicked)
+        self.ui.decks[1].play_pause.connect(self.play_pause_clicked)
         self.ui.decks[0].tempo_slider.valueChanged.connect(self.tempo_changed)
 
         self.library = Library()
         self.ui.track_list.track_selected.connect(self.load_track)
+        self.ui.track_list.track_selected_to_deck.connect(self.load_track)
         self.load_track_list()
 
 
-    @QtCore.pyqtSlot(bool)
-    def play_pause_clicked(self, value):
+    @QtCore.pyqtSlot(bool, int)
+    def play_pause_clicked(self, value, deck):
 
         if value is True:
-            self.engine.play(0)
+            self.engine.play(deck)
             self.send_play()
         else:
-            self.engine.pause(0)
+            self.engine.pause(deck)
 
         print(value)
 
@@ -69,9 +71,15 @@ class Controller(QtCore.QObject):
     def load_track_list(self):
         self.ui.track_list.set_track_info(self.library.get_list())
 
-    def load_track(self, index):
+    def load_track(self, index, deck=None):
+
+        if deck is None:
+            deck = 0
+
+        self.ui.decks[deck].track_info.setText('loading...')
+        self.ui.decks[deck].repaint()
         track = self.library.get(index)
-        self.engine.load_track(0, track)
-        self.ui.decks[0].track_info.setText(track)
+        self.engine.load_track(deck, track)
+        self.ui.decks[deck].track_info.setText(track)
 
 

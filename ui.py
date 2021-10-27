@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtWidgets
 
 class TrackList(QtWidgets.QTableWidget):
     track_selected = QtCore.pyqtSignal(int)
+    track_selected_to_deck = QtCore.pyqtSignal(int, int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -27,12 +28,28 @@ class TrackList(QtWidgets.QTableWidget):
                 item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 self.setItem(i, j, item)
 
+    def contextMenuEvent(self, event):
+
+        row = self.row(self.itemAt(event.pos()))
+
+        menu = QtWidgets.QMenu(self)
+        load_action_1 = menu.addAction('Load to Deck 1')
+        load_action_2 = menu.addAction('Load to Deck 2')
+        action = menu.exec_(event.globalPos())
+
+        if action == load_action_1:
+            self.track_selected_to_deck.emit(row, 0)
+        elif action == load_action_2:
+            self.track_selected_to_deck.emit(row, 1)
+
+
 class Deck(QtWidgets.QWidget):
-    play_pause = QtCore.pyqtSignal(bool)
+    play_pause = QtCore.pyqtSignal(bool, int)
 
-    def __init__(self, parent=None):
+    def __init__(self, deck, parent=None):
 
-        super().__init__()
+        super().__init__(parent)
+        self.deck = deck
 
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -52,9 +69,9 @@ class Deck(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def play_button_clicked(self):
         if self.play_button.isChecked():
-            self.play_pause.emit(True)
+            self.play_pause.emit(True, self.deck)
         else:
-            self.play_pause.emit(False)
+            self.play_pause.emit(False, self.deck)
 
 
 class Ui(QtWidgets.QWidget):
@@ -72,8 +89,8 @@ class Ui(QtWidgets.QWidget):
 
         bottom_layout = QtWidgets.QHBoxLayout()
         self.decks = [
-                Deck(),
-                Deck()
+                Deck(0),
+                Deck(1)
                 ]
         for deck in self.decks:
             bottom_layout.addWidget(deck)

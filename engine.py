@@ -30,7 +30,7 @@ class Engine(threading.Thread):
         from player import Player
 
         if deck not in self.players:
-            self.players[deck] = Player()
+            self.players[deck] = Player(deck)
 
         self.players[deck].load_audio_file(filename)
 
@@ -49,5 +49,6 @@ class Engine(threading.Thread):
         self.players[deck].pause()
 
     def change_tempo(self, deck, value):
+        # TODO
         print(value)
         self.players[deck].tempo = 1 - self.tempo_range*value
