@@ -24,13 +24,12 @@ def main():
 
     engine = Engine()
 
-    controller = Controller(loop, engine)
+    controller = Controller(app, loop, engine)
     
     with loop:
 
         loop.run_forever()
         
-
 
 
 

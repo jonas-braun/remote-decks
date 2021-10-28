@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class TrackList(QtWidgets.QTableWidget):
@@ -81,6 +81,8 @@ class Ui(QtWidgets.QWidget):
 
         self.setGeometry(300, 300, 800, 600)
         self.setWindowTitle('Remote Decks')
+
+        self.shortcut_close = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
 
         layout = QtWidgets.QVBoxLayout(self)
 

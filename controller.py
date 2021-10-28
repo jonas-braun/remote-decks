@@ -9,10 +9,11 @@ from library import Library
 
 class Controller(QtCore.QObject):
 
-    def __init__(self, loop, engine):
+    def __init__(self, app, loop, engine):
 
         super().__init__()
 
+        self.app = app
         self.loop = loop
         self.engine = engine
 
@@ -20,6 +21,8 @@ class Controller(QtCore.QObject):
 
         self.ui = Ui()
         self.ui.show()
+
+        self.ui.shortcut_close.activated.connect(self.close_app)
 
         self.ui.decks[0].play_pause.connect(self.play_pause_clicked)
         self.ui.decks[1].play_pause.connect(self.play_pause_clicked)
@@ -29,6 +32,9 @@ class Controller(QtCore.QObject):
         self.ui.track_list.track_selected.connect(self.load_track)
         self.ui.track_list.track_selected_to_deck.connect(self.load_track)
         self.load_track_list()
+
+    def close_app(self):
+        self.app.quit()
 
 
     @QtCore.pyqtSlot(bool, int)
