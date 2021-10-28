@@ -36,6 +36,11 @@ class Engine(threading.Thread):
 
 
     def play(self, deck, offset=None, timestamp=None):
+        """
+        Offset is the position in the track where the playback is supposed to start.
+        timestamp is the time when that playback was supposed to start, so it can be used to
+        adjust the offset so that it accounts for any time lag in the communication.
+        """
 
         if offset is not None and timestamp:
             offset += time.time() - timestamp

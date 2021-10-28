@@ -63,7 +63,7 @@ class EventBus:
     def send_data(self, timestamp, msg):
         print('client send', msg)
 
-        timestamped_message = f'{timestamp.timestamp():9.6f} {msg}' 
+        timestamped_message = f'{timestamp:17.6f} {msg}' 
 
         if self.exchange:
 
@@ -78,5 +78,4 @@ class EventBus:
                 ),
                 routing_key='',
         )
-        print('ok')
 

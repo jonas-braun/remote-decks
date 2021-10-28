@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from PyQt5 import QtCore
 
@@ -41,25 +42,23 @@ class Controller(QtCore.QObject):
     def play_pause_clicked(self, value, deck):
 
         if value is True:
+            position = self.engine.players[deck].get_position()
             self.engine.play(deck)
-            self.send_play()
+            self.send_play(deck, position)
         else:
             self.engine.pause(deck)
 
         print(value)
 
 
-    def send_play(self):
-        timestamp = datetime.datetime.now()
-        self.event_bus.send_data(timestamp, 'PLAY')
+    def send_play(self, deck, position):
+        timestamp = time.time()
+        self.event_bus.send_data(timestamp, f'PLAY {deck} {position}')
 
-    def receive_play(self, timestamp):
-        self.ui.play_button.setChecked(True)
+    def receive_play(self, timestamp, deck, offset):
+        self.ui.decks[int(deck)].play_button.setChecked(True)
 
-        offset = datetime.datetime.now().timestamp() - float(timestamp)
-        print('OFFSET', offset)
-
-        self.engine.play(offset)
+        self.engine.play(int(deck), offset, timestamp)
 
 
     @QtCore.pyqtSlot(int)
@@ -70,8 +69,10 @@ class Controller(QtCore.QObject):
     def receive(self, timestamp, msg):
 
         print('RECEIVED', timestamp, msg)
-        if msg == 'PLAY':
-            self.receive_play(timestamp)
+        print(msg)
+        if msg.startswith('PLAY'):
+            _, deck, offset = msg.split(' ')
+            self.receive_play(float(timestamp), int(deck), float(offset))
 
 
     def load_track_list(self):

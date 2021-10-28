@@ -73,6 +73,8 @@ class Player:
 
         self.audio_file = sf.SoundFile(filename)
 
+    def get_position(self):
+        return self.audio_file.tell() / self.sample_rate
 
     def play(self, offset=None):
         self.is_playing = True
