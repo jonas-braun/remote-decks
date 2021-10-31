@@ -8,6 +8,9 @@ class Library():
     def __init__(self):
 
         self.tracks = []
+
+        self.folder = Path(os.getenv('RD_LIBRARY'))
+
         self.temp_path = Path('data/temp')
         self.temp_path.mkdir(parents=True, exist_ok=True)
         
@@ -15,13 +18,11 @@ class Library():
 
     def import_folder(self):
 
-        folder = os.getenv('RD_LIBRARY')
-
-        if not folder:
+        if not self.folder:
             return
 
-        for file_ in Path(folder).iterdir():
-            self.tracks.append(str(file_))
+        for file_ in self.folder.iterdir():
+            self.tracks.append(str(file_.relative_to(self.folder)))
             
     def get_list(self):
 
@@ -32,8 +33,8 @@ class Library():
         return input_file
 
     def get(self, name):
-        input_file = name
-        output_file = str(self.temp_path / (Path(input_file).name + '.wav'))
+        input_file = self.folder / name
+        output_file = str(self.temp_path / (name + '.wav'))
         subprocess.run(['ffmpeg', '-y', '-i', input_file, '-vn', '-acodec', 'pcm_s16le', '-ac', '2', '-ar', '44100', '-f', 'wav', output_file])
 
         return (output_file)

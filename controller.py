@@ -119,4 +119,4 @@ class Controller(QtCore.QObject):
         if send is True:
             self.send_load(deck, name)  # TODO load earlier
         self.engine.load_track(deck, track)
-        self.ui.decks[deck].track_info.setText(track)
+        self.ui.decks[deck].track_info.setText(name)
