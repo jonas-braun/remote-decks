@@ -23,7 +23,19 @@ Depends on python3 and PyQt5
 
 `pip install -r requirements.txt`
 
+Uses `ffmpeg` to convert audio files.
+
 Set up a RabbitMQ cluster for communication between clients.
+
+
+## Run
+
+Set some varibles in the shell environment:
+
+`export AMQP_HOST="X.X.X.X"            # set your RabbitMQ IP
+export RD_LIBRARY="/home/user/Music"  # set local path to music library`
+
+Run the program with `./main`
 
 
 ## TODO
