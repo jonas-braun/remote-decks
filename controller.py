@@ -81,19 +81,19 @@ class Controller(QtCore.QObject):
         self.engine.change_tempo(value/256)
 
 
-    def receive(self, timestamp, msg):
+    def receive(self, timestamp, sender, msg):
 
         print('RECEIVED', timestamp, msg)
         print(msg)
         if msg.startswith('PLAY'):
             _, deck, offset = msg.split(' ')
-            self.receive_play(float(timestamp), int(deck), float(offset))
+            self.receive_play(timestamp, int(deck), float(offset))
         elif msg.startswith('LOAD'):
             _, deck, track = msg.split(' ', 2)
-            self.receive_load(float(timestamp), int(deck), track)
+            self.receive_load(timestamp, int(deck), track)
         elif msg.startswith('PAUSE'):
             _, deck = msg.split(' ')
-            self.receive_pause(float(timestamp), int(deck))
+            self.receive_pause(timestamp, int(deck))
 
 
     def load_track_list(self):

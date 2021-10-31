@@ -21,7 +21,6 @@ class EventBus:
         self.user_id = None
         
         task = asyncio.create_task(self.listen(loop))
-        print('started listening')
 
     async def listen(self, loop):
 
@@ -31,6 +30,7 @@ class EventBus:
 
         async with connection:
 
+            print('connected')
             channel = await connection.channel()
             self.exchange = await channel.declare_exchange('events', aio_pika.ExchangeType.FANOUT)
 
@@ -56,8 +56,9 @@ class EventBus:
                             body = message.body.decode()
                             timestamp = body[:17]
                             msg = body[18:]
+                            sender = message.correlation_id
 
-                            self.controller.receive(timestamp, msg)
+                            self.controller.receive(float(timestamp), sender, msg)
 
 
     def send_data(self, timestamp, msg):

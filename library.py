@@ -8,6 +8,8 @@ class Library():
     def __init__(self):
 
         self.tracks = []
+        self.temp_path = Path('data/temp')
+        self.temp_path.mkdir(parents=True, exist_ok=True)
         
         self.import_folder()
 
@@ -31,7 +33,7 @@ class Library():
 
     def get(self, name):
         input_file = name
-        output_file = str(Path('data/temp') / (Path(input_file).name + '.wav'))
+        output_file = str(self.temp_path / (Path(input_file).name + '.wav'))
         subprocess.run(['ffmpeg', '-y', '-i', input_file, '-vn', '-acodec', 'pcm_s16le', '-ac', '2', '-ar', '44100', '-f', 'wav', output_file])
 
         return (output_file)
