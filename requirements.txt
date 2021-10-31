@@ -1,6 +1,6 @@
 aio_pika
 PyQt5
-pasync
+qasync
 soundfile
 sounddevice
 samplerate

@@ -8,7 +8,7 @@ import datetime
 import threading
 
 from PyQt5 import QtWidgets
-from asyncqt import QEventLoop
+from qasync import QEventLoop
 
 from controller import Controller
 from engine import Engine
