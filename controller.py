@@ -31,7 +31,6 @@ class Controller(QtCore.QObject):
 
         self.library = Library()
         self.ui.track_list.track_selected.connect(self.load_track)
-        self.ui.track_list.track_selected_to_deck.connect(self.load_track)
         self.load_track_list()
 
     def close_app(self):
@@ -60,6 +59,13 @@ class Controller(QtCore.QObject):
 
         self.engine.play(int(deck), offset, timestamp)
 
+    def send_load(self, deck, track):
+        timestamp = time.time()
+        self.event_bus.send_data(timestamp, f'LOAD {deck} {track}')
+
+    def receive_load(self, timestamp, deck, track):
+        self.load_track(deck, name=track, send=False)
+
 
     @QtCore.pyqtSlot(int)
     def tempo_changed(self, value):
@@ -73,20 +79,32 @@ class Controller(QtCore.QObject):
         if msg.startswith('PLAY'):
             _, deck, offset = msg.split(' ')
             self.receive_play(float(timestamp), int(deck), float(offset))
+        elif msg.startswith('LOAD'):
+            _, deck, track = msg.split(' ', 2)
+            self.receive_load(float(timestamp), int(deck), track)
 
 
     def load_track_list(self):
         self.ui.track_list.set_track_info(self.library.get_list())
 
-    def load_track(self, index, deck=None):
+    @QtCore.pyqtSlot(int, int)
+    def load_track(self, deck=None, index=None, name=None, send=True):
 
-        if deck is None:
+        if deck < 0:
             deck = 0
 
         self.ui.decks[deck].track_info.setText('loading...')
         self.ui.decks[deck].repaint()
-        track = self.library.get(index)
+
+        if name:
+            pass
+        elif index is not None:
+            name = self.library.get_name(index)
+        else:
+            return
+
+        track = self.library.get(name)
+        if send is True:
+            self.send_load(deck, name)  # TODO load earlier
         self.engine.load_track(deck, track)
         self.ui.decks[deck].track_info.setText(track)
-
-

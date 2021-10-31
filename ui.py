@@ -2,8 +2,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class TrackList(QtWidgets.QTableWidget):
-    track_selected = QtCore.pyqtSignal(int)
-    track_selected_to_deck = QtCore.pyqtSignal(int, int)
+    track_selected = QtCore.pyqtSignal(int, int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -18,7 +17,7 @@ class TrackList(QtWidgets.QTableWidget):
 
     def track_clicked(self, item):
         row = self.row(item)
-        self.track_selected.emit(row)
+        self.track_selected.emit(-1, row)
 
     def set_track_info(self, data):
         for i, row in enumerate(data):
@@ -38,9 +37,9 @@ class TrackList(QtWidgets.QTableWidget):
         action = menu.exec_(event.globalPos())
 
         if action == load_action_1:
-            self.track_selected_to_deck.emit(row, 0)
+            self.track_selected.emit(0, row)
         elif action == load_action_2:
-            self.track_selected_to_deck.emit(row, 1)
+            self.track_selected.emit(1, row)
 
 
 class Deck(QtWidgets.QWidget):
