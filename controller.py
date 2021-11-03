@@ -76,10 +76,20 @@ class Controller(QtCore.QObject):
         self.engine.pause(deck)
         self.ui.decks[deck].play_button.setChecked(False)
 
+    def send_tempo_changed(self, deck, tempo):
+        timestamp = time.time()
+        self.event_bus.send_data(timestamp, f'TEMPO {deck} {tempo}')
+
+    def receive_tempo(self, timestamp, deck, tempo):
+        self.engine.change_tempo(deck, tempo, timestamp)
+        self.ui.decks[deck].tempo_slider.blockSignals(True)
+        self.ui.decks[deck].tempo_slider.setValue(int(tempo*256))
+        self.ui.decks[deck].tempo_slider.blockSignals(False)
 
     @QtCore.pyqtSlot(int, int)
     def tempo_changed(self, value, deck):
         self.engine.change_tempo(deck, value/256)
+        self.send_tempo_changed(deck, value/256)
 
 
     def receive(self, timestamp, sender, msg):
@@ -95,6 +105,9 @@ class Controller(QtCore.QObject):
         elif msg.startswith('PAUSE'):
             _, deck = msg.split(' ')
             self.receive_pause(timestamp, int(deck))
+        elif msg.startswith('TEMPO'):
+            _, deck, tempo = msg.split(' ')
+            self.receive_tempo(timestamp, int(deck), float(tempo))
 
 
     def load_track_list(self):
