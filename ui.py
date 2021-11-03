@@ -44,6 +44,7 @@ class TrackList(QtWidgets.QTableWidget):
 
 class Deck(QtWidgets.QWidget):
     play_pause = QtCore.pyqtSignal(bool, int)
+    tempo_changed = QtCore.pyqtSignal(int, int)
 
     def __init__(self, deck, parent=None):
 
@@ -63,6 +64,7 @@ class Deck(QtWidgets.QWidget):
         self.tempo_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.tempo_slider.setMinimum(-255)
         self.tempo_slider.setMaximum(+255)
+        self.tempo_slider.valueChanged.connect(self.tempo_change)
         layout.addWidget(self.tempo_slider)
 
     @QtCore.pyqtSlot()
@@ -71,6 +73,10 @@ class Deck(QtWidgets.QWidget):
             self.play_pause.emit(True, self.deck)
         else:
             self.play_pause.emit(False, self.deck)
+
+    @QtCore.pyqtSlot(int)
+    def tempo_change(self, value):
+        self.tempo_changed.emit(value, self.deck)
 
 
 class Ui(QtWidgets.QWidget):

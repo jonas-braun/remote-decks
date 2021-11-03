@@ -54,6 +54,5 @@ class Engine(threading.Thread):
         self.players[deck].pause()
 
     def change_tempo(self, deck, value):
-        # TODO
         print(value)
         self.players[deck].tempo = 1 - self.tempo_range*value

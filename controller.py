@@ -27,7 +27,8 @@ class Controller(QtCore.QObject):
 
         self.ui.decks[0].play_pause.connect(self.play_pause_clicked)
         self.ui.decks[1].play_pause.connect(self.play_pause_clicked)
-        self.ui.decks[0].tempo_slider.valueChanged.connect(self.tempo_changed)
+        self.ui.decks[0].tempo_changed.connect(self.tempo_changed)
+        self.ui.decks[1].tempo_changed.connect(self.tempo_changed)
 
         self.library = Library()
         self.ui.track_list.track_selected.connect(self.load_track)
@@ -76,9 +77,9 @@ class Controller(QtCore.QObject):
         self.ui.decks[deck].play_button.setChecked(False)
 
 
-    @QtCore.pyqtSlot(int)
-    def tempo_changed(self, value):
-        self.engine.change_tempo(value/256)
+    @QtCore.pyqtSlot(int, int)
+    def tempo_changed(self, value, deck):
+        self.engine.change_tempo(deck, value/256)
 
 
     def receive(self, timestamp, sender, msg):
