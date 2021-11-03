@@ -55,5 +55,9 @@ class Engine(threading.Thread):
 
     def change_tempo(self, deck, value, timestamp=None):
         print(value)
-        # TODO seek based on timestamp first
-        self.players[deck].tempo = 1 - self.tempo_range*value
+        tempo = 1 - self.tempo_range*value
+        if timestamp:
+            offset = time.time() - timestamp
+            self.players[deck].set_tempo(tempo, offset)
+        else:
+            self.players[deck].tempo = tempo

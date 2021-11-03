@@ -76,6 +76,12 @@ class Player:
     def get_position(self):
         return self.audio_file.tell() / self.sample_rate
 
+    def set_tempo(self, tempo, offset):
+        position = self.audio_file.tell() / self.sample_rate
+        corrected_position = position + (offset * (tempo - self.tempo))
+        self.audio_file.seek(int(corrected_position * self.sample_rate))
+        self.tempo = tempo
+
     def play(self, offset=None):
         self.is_playing = True
         if offset:
