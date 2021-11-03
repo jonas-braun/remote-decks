@@ -34,6 +34,8 @@ class Controller(QtCore.QObject):
         self.ui.track_list.track_selected.connect(self.load_track)
         self.load_track_list()
 
+        self.ui.cross_fader.valueChanged.connect(self.cross_fade)
+
     def close_app(self):
         self.app.quit()
 
@@ -86,6 +88,16 @@ class Controller(QtCore.QObject):
         self.ui.decks[deck].tempo_slider.setValue(int(tempo*256))
         self.ui.decks[deck].tempo_slider.blockSignals(False)
 
+    def send_cross_fade(self, value):
+        timestamp = time.time()
+        self.event_bus.send_data(timestamp, f'CROSSFADE {value}')
+
+    def receive_cross_fade(self, timestamp, value):
+        self.cross_fade(value, send=False)
+        self.ui.cross_fader.blockSignals(True)
+        self.ui.cross_fader.setValue(value)
+        self.ui.cross_fader.blockSignals(False)
+
     @QtCore.pyqtSlot(int, int)
     def tempo_changed(self, value, deck):
         self.engine.change_tempo(deck, value/256)
@@ -108,6 +120,9 @@ class Controller(QtCore.QObject):
         elif msg.startswith('TEMPO'):
             _, deck, tempo = msg.split(' ')
             self.receive_tempo(timestamp, int(deck), float(tempo))
+        elif msg.startswith('CROSSFADE'):
+            _, value = msg.split(' ')
+            self.receive_cross_fade(timestamp, int(value))
 
 
     def load_track_list(self):
@@ -130,7 +145,21 @@ class Controller(QtCore.QObject):
             return
 
         track = self.library.get(name)
+
         if send is True:
             self.send_load(deck, name)  # TODO load earlier
+
         self.engine.load_track(deck, track)
         self.ui.decks[deck].track_info.setText(name)
+
+    @QtCore.pyqtSlot(int)
+    def cross_fade(self, value, send=True):
+        # "Transition" linear mode
+        left_volume = min(1, 1 - value/256)
+        right_volume = min(1, 1 + value/256)
+
+        self.engine.players[0].volume = left_volume
+        self.engine.players[1].volume = right_volume
+
+        if send is True:
+            self.send_cross_fade(value)

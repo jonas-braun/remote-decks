@@ -104,3 +104,8 @@ class Ui(QtWidgets.QWidget):
 
         layout.addLayout(bottom_layout)
 
+        self.cross_fader = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.cross_fader.setMinimum(-256)
+        self.cross_fader.setMaximum(+256)
+        layout.addWidget(self.cross_fader)
+
