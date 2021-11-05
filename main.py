@@ -29,6 +29,8 @@ def main():
     with loop:
 
         loop.run_forever()
+
+    engine.terminate = True
         
 
 

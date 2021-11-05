@@ -8,6 +8,7 @@ class Engine(threading.Thread):
         super().__init__()
 
         self.running = False
+        self.terminate = False
         self.tempo_range = (33+8)/33 - 1
 
         self.start()
@@ -22,8 +23,8 @@ class Engine(threading.Thread):
 
         self.running = True
 
-        while True:
-            time.sleep(1)
+        while not self.terminate:
+            time.sleep(.5)
 
     def load_track(self, deck, filename):
 
