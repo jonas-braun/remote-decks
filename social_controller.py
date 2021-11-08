@@ -14,6 +14,8 @@ class SocialController(QtCore.QObject):
 
         self.social = self.ui.social
 
+        self.status = {}
+
         self.social.send_button.clicked.connect(self.send)
 
         self.syn_timer = QtCore.QTimer()
@@ -45,12 +47,24 @@ class SocialController(QtCore.QObject):
             self.receive_chat(timestamp, sender, value)
         
     def receive_syn(self, timestamp, sender):
-        pass
+        
+        self.status[sender] = timestamp
+        self.social.show_status(self.status)
 
-    def receive_chat(self, timetamp, sender, message):
+
+    def receive_chat(self, timestamp, sender, message):
         self.social.add_message(sender + ' - ' + message[:256])
+
+        self.status[sender] = timestamp
+        self.social.show_status(self.status)
 
     @QtCore.pyqtSlot()
     def check_status(self):
 
-        pass
+        now = time.time()
+
+        for sender, timestamp in self.status.copy().items():
+            if now - timestamp > 30:
+                del self.status[sender]
+                self.social.show_status(self.status)
+

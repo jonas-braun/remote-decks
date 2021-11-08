@@ -31,3 +31,8 @@ class Social(QtWidgets.QWidget):
 
         self.canvas.addItem(message)
         self.canvas.scrollToBottom()
+
+    def show_status(self, status):
+
+        line = ' '.join(status.keys())
+        self.status_line.setText(line)
