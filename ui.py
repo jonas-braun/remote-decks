@@ -1,5 +1,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from social import Social
+
 
 class TrackList(QtWidgets.QTableWidget):
     track_selected = QtCore.pyqtSignal(int, int)
@@ -108,4 +110,7 @@ class Ui(QtWidgets.QWidget):
         self.cross_fader.setMinimum(-256)
         self.cross_fader.setMaximum(+256)
         layout.addWidget(self.cross_fader)
+
+        self.social = Social()
+        layout.addWidget(self.social)
 

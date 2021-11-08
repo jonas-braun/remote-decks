@@ -18,7 +18,7 @@ async def main():
 
     controller = TestController()
 
-    event_bus = EventBus(loop, controller)
+    event_bus = EventBus(loop, controller, silent=True)
 
     await asyncio.sleep(100000)
 

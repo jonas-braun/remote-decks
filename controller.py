@@ -6,6 +6,7 @@ from PyQt5 import QtCore
 from ui import Ui
 from events import EventBus
 from library import Library
+from social_controller import SocialController
 
 
 class Controller(QtCore.QObject):
@@ -35,6 +36,8 @@ class Controller(QtCore.QObject):
         self.load_track_list()
 
         self.ui.cross_fader.valueChanged.connect(self.cross_fade)
+
+        self.social_controller = SocialController(self, self.ui)
 
     def close_app(self):
         self.app.quit()
@@ -123,6 +126,9 @@ class Controller(QtCore.QObject):
         elif msg.startswith('CROSSFADE'):
             _, value = msg.split(' ')
             self.receive_cross_fade(timestamp, int(value))
+        elif msg.startswith('SOC'):
+            _, value = msg.split(' ', 1)
+            self.social_controller.receive(timestamp, sender, value)
 
 
     def load_track_list(self):

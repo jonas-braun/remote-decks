@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import time
 import asyncio
 import datetime
 
@@ -13,16 +14,16 @@ AMQP_HOST = os.getenv('AMQP_HOST')
 
 class EventBus:
 
-    def __init__(self, loop, controller):
+    def __init__(self, loop, controller, silent=False):
 
         self.controller = controller
 
         self.exchange = None
         self.user_id = None
         
-        task = asyncio.create_task(self.listen(loop))
+        task = asyncio.create_task(self.listen(loop, silent=silent))
 
-    async def listen(self, loop):
+    async def listen(self, loop, silent=False):
 
         connection = await aio_pika.connect_robust(
                 f'amqp://guest:guest@{AMQP_HOST}/', loop=loop
@@ -40,6 +41,9 @@ class EventBus:
             self.user_id = str(queue)
 
             await queue.bind(self.exchange)
+
+            if not silent:
+                loop.create_task(self.heartbeat())
 
             async with queue.iterator() as queue_iter:
 
@@ -80,3 +84,7 @@ class EventBus:
                 routing_key='',
         )
 
+    async def heartbeat(self):
+        while True:
+            self.send_data(time.time(), 'SOC SYN')
+            await asyncio.sleep(10)
