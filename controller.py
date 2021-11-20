@@ -1,6 +1,8 @@
 import datetime
 import time
 
+from functools import partial
+
 from PyQt5 import QtCore
 
 from ui import Ui
@@ -18,6 +20,8 @@ class Controller(QtCore.QObject):
         self.app = app
         self.loop = loop
         self.engine = engine
+
+        self.timers = {}
 
         self.event_bus = EventBus(loop, self)
 
@@ -49,9 +53,12 @@ class Controller(QtCore.QObject):
         if value is True:
             position = self.engine.players[deck].get_position()
             self.engine.play(deck)
+            self.connect_vu_meter(deck)
             self.send_play(deck, position)
         else:
             self.engine.pause(deck)
+            del self.timers[deck]
+            self.ui.decks[deck].vu_meter.setValue(0)
             self.send_pause(deck)
 
         print(value)
@@ -169,3 +176,22 @@ class Controller(QtCore.QObject):
 
         if send is True:
             self.send_cross_fade(value)
+
+    def connect_vu_meter(self, deck):
+
+        timer = QtCore.QTimer()
+        timer.deck = deck
+        timer.setInterval(20)
+
+        callback = partial(self.update_vu_meter, deck=deck)
+        timer.timeout.connect(callback)
+        timer.start()
+        self.timers[deck] = timer
+
+    @QtCore.pyqtSlot()
+    def update_vu_meter(self, deck):
+
+        value = self.engine.players[deck].loudness * 100
+        self.ui.decks[deck].vu_meter.setValue(value)
+
+

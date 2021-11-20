@@ -53,7 +53,9 @@ class Deck(QtWidgets.QWidget):
         super().__init__(parent)
         self.deck = deck
 
-        layout = QtWidgets.QVBoxLayout(self)
+        main_layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
+        main_layout.addLayout(layout)
 
         self.track_info = QtWidgets.QLabel()
         layout.addWidget(self.track_info)
@@ -68,6 +70,11 @@ class Deck(QtWidgets.QWidget):
         self.tempo_slider.setMaximum(+255)
         self.tempo_slider.valueChanged.connect(self.tempo_change)
         layout.addWidget(self.tempo_slider)
+
+        self.vu_meter = QtWidgets.QProgressBar()
+        self.vu_meter.setOrientation(2)
+
+        main_layout.addWidget(self.vu_meter)
 
     @QtCore.pyqtSlot()
     def play_button_clicked(self):

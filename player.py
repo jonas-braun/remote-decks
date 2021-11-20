@@ -37,6 +37,8 @@ class Player:
         self.volume = 1
         self.tempo = 1
 
+        self.loudness = 0.
+
         self.is_playing = False
 
         self.buffer = np.zeros((self.blocksize, 2), dtype='float32')
@@ -65,6 +67,8 @@ class Player:
             self.buffer[:data.shape[0], :] = data
 
             outdata[:] = self.buffer
+
+            self.loudness = np.average(np.abs(self.buffer))
 
         return callback
 
