@@ -23,6 +23,8 @@ Depends on python3 and PyQt5
 
 `pip install -r requirements.txt`
 
+The python package `samplerate` depends on `libsamplerate0-dev` and `libffi-dev` version 7.
+
 Uses `ffmpeg` to convert audio files.
 
 Set up a RabbitMQ cluster for communication between clients.
