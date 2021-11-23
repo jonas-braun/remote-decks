@@ -4,3 +4,6 @@ qasync
 soundfile
 sounddevice
 samplerate
+requests
+
+google-auth
