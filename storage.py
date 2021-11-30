@@ -48,7 +48,7 @@ class GoogleStorage:
         headers = {'Authorization': 'Bearer {}'.format(self.token)}
         response = requests.get(self.base_url + 'b/' + os.getenv('RD_STORAGE_GOOGLE_BUCKET') + '/o', headers=headers)
 
-        return response.json()
+        return [item['name'] for item in response.json()['items']]
 
 if __name__ == '__main__':
     s = GoogleStorage()

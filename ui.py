@@ -4,14 +4,16 @@ from social import Social
 
 
 class TrackList(QtWidgets.QTableWidget):
-    track_selected = QtCore.pyqtSignal(int, int)
+    track_selected = QtCore.pyqtSignal(int, str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.setColumnCount(2)
-        self.setColumnWidth(0, 600)
-        self.setHorizontalHeaderLabels(['Artist', 'Track'])
+        self.setColumnCount(3)
+        self.setColumnWidth(0, 300)
+        self.setColumnWidth(1, 400)
+        self.setColumnWidth(2, 200)
+        self.setHorizontalHeaderLabels(['Artist', 'Track', 'File'])
         self.verticalHeader().hide()
 
         self.setSelectionBehavior(1)
@@ -19,12 +21,13 @@ class TrackList(QtWidgets.QTableWidget):
 
     def track_clicked(self, item):
         row = self.row(item)
-        self.track_selected.emit(-1, row)
+        id_item = self.item(row, 2)
+        self.track_selected.emit(-1, id_item.data(0))
 
     def set_track_info(self, data):
-        for i, row in enumerate(data):
+        for i, (filename, row) in enumerate(data.items()):
             self.insertRow(i)
-            for j, info in enumerate(row):
+            for j, info in enumerate([row['artist'], row['title'], filename]):
                 item = QtWidgets.QTableWidgetItem(info)
                 item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 self.setItem(i, j, item)
@@ -32,6 +35,7 @@ class TrackList(QtWidgets.QTableWidget):
     def contextMenuEvent(self, event):
 
         row = self.row(self.itemAt(event.pos()))
+        track_id = self.item(row, 2).data(0)
 
         menu = QtWidgets.QMenu(self)
         load_action_1 = menu.addAction('Load to Deck 1')
@@ -39,9 +43,9 @@ class TrackList(QtWidgets.QTableWidget):
         action = menu.exec_(event.globalPos())
 
         if action == load_action_1:
-            self.track_selected.emit(0, row)
+            self.track_selected.emit(0, track_id)
         elif action == load_action_2:
-            self.track_selected.emit(1, row)
+            self.track_selected.emit(1, track_id)
 
 
 class Deck(QtWidgets.QWidget):
@@ -100,8 +104,8 @@ class Ui(QtWidgets.QWidget):
 
         layout = QtWidgets.QVBoxLayout(self)
 
-        self.track_list = TrackList()
-        layout.addWidget(self.track_list)
+        self.top_layout = QtWidgets.QTabWidget()
+        layout.addWidget(self.top_layout)
 
         bottom_layout = QtWidgets.QHBoxLayout()
         self.decks = [
@@ -121,3 +125,14 @@ class Ui(QtWidgets.QWidget):
         self.social = Social()
         layout.addWidget(self.social)
 
+    def add_track_list(self, name):
+
+        track_list = TrackList()
+        self.top_layout.addTab(track_list, name)
+        index = self.top_layout.indexOf(track_list)
+
+        return index, track_list
+    
+    def set_track_list(self, index, data):
+        track_list = self.top_layout.widget(index)
+        track_list.set_track_info(data)

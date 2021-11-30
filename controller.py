@@ -7,7 +7,7 @@ from PyQt5 import QtCore
 
 from ui import Ui
 from events import EventBus
-from library import Library
+from library_controller import LibraryController
 from social_controller import SocialController
 
 
@@ -35,13 +35,11 @@ class Controller(QtCore.QObject):
         self.ui.decks[0].tempo_changed.connect(self.tempo_changed)
         self.ui.decks[1].tempo_changed.connect(self.tempo_changed)
 
-        self.library = Library()
-        self.ui.track_list.track_selected.connect(self.load_track)
-        self.load_track_list()
-
         self.ui.cross_fader.valueChanged.connect(self.cross_fade)
 
         self.social_controller = SocialController(self, self.ui)
+
+        self.library_controller = LibraryController(self, self.ui)
 
     def close_app(self):
         self.app.quit()
@@ -108,6 +106,9 @@ class Controller(QtCore.QObject):
         self.ui.cross_fader.setValue(value)
         self.ui.cross_fader.blockSignals(False)
 
+    def send_library(self, bucket, token):
+        # store and send when new client joins
+
     @QtCore.pyqtSlot(int, int)
     def tempo_changed(self, value, deck):
         self.engine.change_tempo(deck, value/256)
@@ -133,37 +134,13 @@ class Controller(QtCore.QObject):
         elif msg.startswith('CROSSFADE'):
             _, value = msg.split(' ')
             self.receive_cross_fade(timestamp, int(value))
+        elif msg.startswith('LIBRARY'):
+            _, value = msg.split(' ', 1)
+            self.library_controller.receive(timestamp, sender, value)
         elif msg.startswith('SOC'):
             _, value = msg.split(' ', 1)
             self.social_controller.receive(timestamp, sender, value)
 
-
-    def load_track_list(self):
-        self.ui.track_list.set_track_info(self.library.get_list())
-
-    @QtCore.pyqtSlot(int, int)
-    def load_track(self, deck=None, index=None, name=None, send=True):
-
-        if deck < 0:
-            deck = 0
-
-        self.ui.decks[deck].track_info.setText('loading...')
-        self.ui.decks[deck].repaint()
-
-        if name:
-            pass
-        elif index is not None:
-            name = self.library.get_name(index)
-        else:
-            return
-
-        track = self.library.get(name)
-
-        if send is True:
-            self.send_load(deck, name)  # TODO load earlier
-
-        self.engine.load_track(deck, track)
-        self.ui.decks[deck].track_info.setText(name)
 
     @QtCore.pyqtSlot(int)
     def cross_fade(self, value, send=True):

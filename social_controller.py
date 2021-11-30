@@ -16,12 +16,24 @@ class SocialController(QtCore.QObject):
 
         self.status = {}
 
+        self.greetings = set()
+
+        self.social.input_textbox.returnPressed.connect(self.send)
         self.social.send_button.clicked.connect(self.send)
 
         self.syn_timer = QtCore.QTimer()
         self.syn_timer.setInterval(10000)
         self.syn_timer.timeout.connect(self.check_status)
         self.syn_timer.start()
+
+    def update_status(self, timestamp, sender):
+
+        if sender not in self.status:
+            for greeting in self.greetings:
+                self.controller.event_bus.send_data(time.time(), greeting)
+
+        self.status[sender] = timestamp
+        self.social.show_status(self.status)
 
     @QtCore.pyqtSlot()
     def send(self):
@@ -47,16 +59,13 @@ class SocialController(QtCore.QObject):
             self.receive_chat(timestamp, sender, value)
         
     def receive_syn(self, timestamp, sender):
-        
-        self.status[sender] = timestamp
-        self.social.show_status(self.status)
 
+        self.update_status(timestamp, sender)
 
     def receive_chat(self, timestamp, sender, message):
         self.social.add_message(sender + ' - ' + message[:256])
 
-        self.status[sender] = timestamp
-        self.social.show_status(self.status)
+        self.update_status(timestamp, sender)
 
     @QtCore.pyqtSlot()
     def check_status(self):

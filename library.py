@@ -1,38 +1,64 @@
 import os
+import json
 from pathlib import Path
 import subprocess
+
+import eyed3
 
 
 class Library():
 
-    def __init__(self):
+    fields_of_interest = {'artist', 'title'}
 
-        self.tracks = []
+    def __init__(self, folder):
 
-        self.folder = Path(os.getenv('RD_LIBRARY'))
+        self.folder = Path(folder)
+        self.name = self.folder.name
+        self.tracks = {}
 
         self.temp_path = Path('data/temp')
         self.temp_path.mkdir(parents=True, exist_ok=True)
+
+        #TODO check for json lib first, then check files, then check remote
+        if (self.folder / 'library.json').exists():
+            self.load_library_file()
+        else:
+            self.import_folder()
         
-        self.import_folder()
+    def load_library_file(self):
+        with (self.folder / 'library.json').open() as f:
+            self.tracks = json.load(f)
 
     def import_folder(self):
 
-        if not self.folder:
-            return
+        assert not self.tracks
 
         for file_ in self.folder.iterdir():
-            self.tracks.append(str(file_.relative_to(self.folder)))
+            filename = str(file_.relative_to(self.folder))
+            print(filename)
+
+            metadata = eyed3.load(file_)
+            if not metadata:
+                continue
+
+            data = {}
+            for tag in self.fields_of_interest:
+                data[tag] = getattr(metadata.tag, tag)
+
+            self.tracks[filename] = data
+
+        with (self.folder / 'library.json').open('w') as f:
+            json.dump(self.tracks, f)
             
     def get_list(self):
 
-        return([[f, '.'] for f in self.tracks])
-
-    def get_name(self, index):
-        input_file = self.tracks[index]
-        return input_file
+        return(self.tracks)
 
     def get(self, name):
+
+        if name not in self.tracks:
+            raise Exception
+
         input_file = self.folder / name
         output_file = str(self.temp_path / (name + '.wav'))
         subprocess.run(['ffmpeg', '-y', '-i', input_file, '-vn', '-acodec', 'pcm_s16le', '-ac', '2', '-ar', '44100', '-f', 'wav', output_file])
