@@ -65,3 +65,11 @@ class Library():
 
         return (output_file)
 
+
+class RemoteLibrary(Library):
+
+    def __init__(self, bucket, name, token):
+
+        pass
+        # TODO abstract methods for loading; provide a temp path for downloaded files
+    

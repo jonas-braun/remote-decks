@@ -3,7 +3,7 @@ from functools import partial
 
 from PyQt5 import QtCore
 
-from library import Library
+from library import Library, RemoteLibrary
 from storage import GoogleStorage
 
 
@@ -17,7 +17,12 @@ class LibraryController(QtCore.QObject):
         self.ui = ui
 
         self.libraries = {}
+
+        self.storage = GoogleStorage()
+
         folders = os.getenv('RD_LIBRARY')
+        if not folders:
+            return
         for folder in folders.split(':'):
 
             new_library = Library(folder)
@@ -26,21 +31,30 @@ class LibraryController(QtCore.QObject):
 
             self.load_track_list(new_library)
 
-        if os.getenv('RD_STORAGE_GOOGLE_BUCKET'):
-            # host mode
-            self.storage = GoogleStorage()
-            assert self.storage.initialized
+            if self.storage.initialized:
+                # host mode
+
+                # assume that the local folder and the remote folder are in sync
             
-            bucket = os.getenv('RD_STORAGE_GOOGLE_BUCKET')
-            token = self.storage.token
-            self.controller.social_controller.greetings.add(f'LIBRARY {bucket} {token}')
+                bucket = os.getenv('RD_STORAGE_GOOGLE_BUCKET')
+                name = new_library.name 
+                token = self.storage.token
+                self.controller.social_controller.greetings.add(f'LIBRARY {bucket} {name} {token}')
 
     def receive(self, timetamp, sender, value):
-        bucket, token = value.split(' ')
+        bucket, name, token = value.split(' ')
 
-        #if bucket not in self.remote_
-        # TODO bucket + folder + token
-        # TODO receive_load_track
+        for library in self.libraries:
+            if (isinstance(library, RemoteLibrary) 
+                    and library.bucket == bucket
+                    and library.name == name):
+                # library.token = token
+                return
+        else:
+            new_library = RemoteLibrary(bucket, name, token)
+            self.libraries[new_library.name] = new_library
+            self.load_track_list(new_library)
+
 
     def load_track_list(self, library):
         index, track_list = self.ui.add_track_list(library.name)
