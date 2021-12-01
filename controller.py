@@ -70,13 +70,14 @@ class Controller(QtCore.QObject):
         self.ui.decks[int(deck)].play_button.setChecked(True)
 
         self.engine.play(int(deck), offset, timestamp)
+        self.connect_vu_meter(deck)
 
     def send_load(self, deck, track):
         timestamp = time.time()
         self.event_bus.send_data(timestamp, f'LOAD {deck} {track}')
 
     def receive_load(self, timestamp, deck, track):
-        self.load_track(deck, name=track, send=False)
+        self.library_controller.load_track(deck, name=track, send=False)
 
     def send_pause(self, deck):
         timestamp = time.time()
@@ -85,6 +86,8 @@ class Controller(QtCore.QObject):
     def receive_pause(self, timestamp, deck):
         self.engine.pause(deck)
         self.ui.decks[deck].play_button.setChecked(False)
+        del self.timers[deck]
+        self.ui.decks[deck].vu_meter.setValue(0)
 
     def send_tempo_changed(self, deck, tempo):
         timestamp = time.time()
@@ -105,9 +108,6 @@ class Controller(QtCore.QObject):
         self.ui.cross_fader.blockSignals(True)
         self.ui.cross_fader.setValue(value)
         self.ui.cross_fader.blockSignals(False)
-
-    def send_library(self, bucket, token):
-        # store and send when new client joins
 
     @QtCore.pyqtSlot(int, int)
     def tempo_changed(self, value, deck):

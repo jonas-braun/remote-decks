@@ -38,7 +38,7 @@ class LibraryController(QtCore.QObject):
     def receive(self, timetamp, sender, value):
         bucket, token = value.split(' ')
 
-        if bucket not in self.remote_
+        #if bucket not in self.remote_
         # TODO bucket + folder + token
         # TODO receive_load_track
 
@@ -52,6 +52,9 @@ class LibraryController(QtCore.QObject):
     @QtCore.pyqtSlot(int, str)
     def load_track(self, deck=-1, name=None, library_name=None, send=True):
 
+        if not name:
+            raise Exception
+
         if deck < 0:
             deck = 0
 
@@ -59,12 +62,8 @@ class LibraryController(QtCore.QObject):
         self.ui.decks[deck].repaint()
 
         if not library_name:
-            raise NotImplementedError
-
-        if name:
-            pass
-        else:
-            return
+            # search everywhere
+            library_name = self.find_name_in_library(name)
 
         track = self.libraries[library_name].get(name)
 
@@ -73,3 +72,11 @@ class LibraryController(QtCore.QObject):
 
         self.controller.engine.load_track(deck, track)
         self.ui.decks[deck].track_info.setText(name)
+
+
+    def find_name_in_library(self, name):
+        for library in self.libraries.values():
+            if name in library.tracks:
+                return library.name
+        else:
+            raise Exception('File name not found in libraries')
