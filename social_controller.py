@@ -29,6 +29,7 @@ class SocialController(QtCore.QObject):
     def update_status(self, timestamp, sender):
 
         if sender not in self.status:
+            self.controller.event_bus.send_data(time.time(), f'SOC SYN')
             for greeting in self.greetings:
                 self.controller.event_bus.send_data(time.time(), greeting)
 
