@@ -13,7 +13,7 @@ class StorageThread(QtCore.QThread):
 
     def run(self):
 
-        self.storage = GoogleStorage()
+        self.storage = GoogleStorage(host_mode=True)
 
         if self.storage.initialized:
             self.initialized.emit()
@@ -53,6 +53,8 @@ class LibraryController(QtCore.QObject):
     
         bucket = os.getenv('RD_STORAGE_GOOGLE_BUCKET')
         for library in self.libraries.values():
+            if isinstance(library, RemoteLibrary):
+                continue
             name = library.name 
             token = self.storage_thread.storage.token
             self.controller.social_controller.greetings.add(f'LIBRARY {bucket} {name} {token}')
@@ -65,7 +67,7 @@ class LibraryController(QtCore.QObject):
             if (isinstance(library, RemoteLibrary) 
                     and library.bucket == bucket
                     and library.name == name):
-                # library.token = token
+                library.token = token
                 return
         else:
             new_library = RemoteLibrary(bucket, name, token)

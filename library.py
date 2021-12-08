@@ -5,6 +5,7 @@ import subprocess
 
 import eyed3
 
+from storage import GoogleStorage
 
 class Library():
 
@@ -70,10 +71,14 @@ class RemoteLibrary(Library):
 
     def __init__(self, bucket, name, token):
 
+        self.bucket = bucket
+
         folder = Path('data') / name
         folder.mkdir(parents=True, exist_ok=True)
 
-        self.bucket = bucket
+        self.storage = GoogleStorage()
+        self.storage.initialize(bucket, token)
+
+        self.storage.get(f'{name}/library.json', folder / 'library.json')
 
         super().__init__(folder)
-
