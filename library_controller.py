@@ -7,6 +7,18 @@ from library import Library, RemoteLibrary
 from storage import GoogleStorage
 
 
+class StorageThread(QtCore.QThread):
+
+    initialized = QtCore.pyqtSignal()
+
+    def run(self):
+
+        self.storage = GoogleStorage()
+
+        if self.storage.initialized:
+            self.initialized.emit()
+
+
 class LibraryController(QtCore.QObject):
 
     def __init__(self, controller, ui):
@@ -16,9 +28,8 @@ class LibraryController(QtCore.QObject):
         self.controller = controller
         self.ui = ui
 
+        # TODO: load asynchronously, especially the storage code that calls an API.
         self.libraries = {}
-
-        self.storage = GoogleStorage()
 
         folders = os.getenv('RD_LIBRARY')
         if not folders:
@@ -31,20 +42,26 @@ class LibraryController(QtCore.QObject):
 
             self.load_track_list(new_library)
 
-            if self.storage.initialized:
-                # host mode
+        self.storage_thread = StorageThread()
+        self.storage_thread.initialized.connect(self.storage_initialized)
+        self.storage_thread.start()
 
-                # assume that the local folder and the remote folder are in sync
-            
-                bucket = os.getenv('RD_STORAGE_GOOGLE_BUCKET')
-                name = new_library.name 
-                token = self.storage.token
-                self.controller.social_controller.greetings.add(f'LIBRARY {bucket} {name} {token}')
+    def storage_initialized(self):
+        # host mode
+
+        # assume that the local folder and the remote folder are in sync
+    
+        bucket = os.getenv('RD_STORAGE_GOOGLE_BUCKET')
+        for library in self.libraries.values():
+            name = library.name 
+            token = self.storage_thread.storage.token
+            self.controller.social_controller.greetings.add(f'LIBRARY {bucket} {name} {token}')
 
     def receive(self, timetamp, sender, value):
         bucket, name, token = value.split(' ')
 
-        for library in self.libraries:
+        for library in self.libraries.values():
+            print('find', library.name)
             if (isinstance(library, RemoteLibrary) 
                     and library.bucket == bucket
                     and library.name == name):

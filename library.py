@@ -70,6 +70,10 @@ class RemoteLibrary(Library):
 
     def __init__(self, bucket, name, token):
 
-        pass
-        # TODO abstract methods for loading; provide a temp path for downloaded files
-    
+        folder = Path('data') / name
+        folder.mkdir(parents=True, exist_ok=True)
+
+        self.bucket = bucket
+
+        super().__init__(folder)
+
