@@ -1,3 +1,5 @@
+!["screenshot"](screenshot.png?raw=true)
+
 # Remote Decks
 
 A latency-aware DJ tool for remote collaborative music playing.
@@ -34,16 +36,27 @@ Set up a RabbitMQ cluster for communication between clients.
 
 Set some varibles in the shell environment:
 
-`export AMQP_HOST="X.X.X.X"            # set your RabbitMQ IP
-export RD_LIBRARY="/home/user/Music"  # set local path to music library`
+```
+export AMQP_HOST="X.X.X.X"            # set your RabbitMQ IP
+export RD_LIBRARY="/home/user/Music"  # set local path to music libraries, separated by :
+```
 
 Run the program with `./main`
 
 
-## TODO
+## Music Library
 
-### Music Library
-The clients need to have access to a common music library and pull songs that other clients have loaded into a deck.
+Currently, Google Cloud Storage is supported as a backend for sharing music libraries between participants. A user that wants to host their music collection needs to upload it to a bucket, including the library.json file, and set the environment variables
+
+```
+export RD_STORAGE_GOOGLE_ACCOUNT=/path/to/service-account.json
+export RD_GOOGLE_ACCOUNT_READONLY=service-account-readonly@project.iam.gserviceaccount.com
+export RD_GOOGLE_BUCKET=bucket-name
+```
+
+When the remote-decks program is started, a temporary token is made for the read-only service account and that token is sent to all other connected clients. These clients download music files from the bucket using that token.
+
+## TODO
 
 ### Headphone Logic
 Any client can play songs only locally to pre-listen. Those events are not sent to the other clients.
