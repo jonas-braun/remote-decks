@@ -125,7 +125,10 @@ class Ui(QtWidgets.QWidget):
         self.social = Social()
         layout.addWidget(self.social)
 
-    def add_track_list(self, name):
+    def add_track_list(self, name, remote=False):
+
+        if remote:
+            name = '*' + name
 
         track_list = TrackList()
         self.top_layout.addTab(track_list, name)

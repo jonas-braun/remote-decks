@@ -58,8 +58,8 @@ class GoogleStorage:
         print(url)
         response = requests.get(url, headers=headers)
 
-        with location.open('w') as f:
-            json.dump(response.json(), f)
+        with location.open('wb') as f:
+            f.write(response.content)
 
 
 if __name__ == '__main__':

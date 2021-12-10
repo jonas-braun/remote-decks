@@ -82,3 +82,12 @@ class RemoteLibrary(Library):
         self.storage.get(f'{name}/library.json', folder / 'library.json')
 
         super().__init__(folder)
+
+    def get(self, name):
+
+        input_file = self.folder.name + '/' + name
+
+        self.storage.get(input_file, self.folder / name)
+
+        return super().get(name)
+

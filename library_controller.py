@@ -70,13 +70,16 @@ class LibraryController(QtCore.QObject):
                 library.token = token
                 return
         else:
-            new_library = RemoteLibrary(bucket, name, token)
+            try:
+                new_library = RemoteLibrary(bucket, name, token)
+            except Exception as e:
+                raise e
             self.libraries[new_library.name] = new_library
             self.load_track_list(new_library)
 
 
     def load_track_list(self, library):
-        index, track_list = self.ui.add_track_list(library.name)
+        index, track_list = self.ui.add_track_list(library.name, remote=isinstance(library, RemoteLibrary))
         callback = partial(self.load_track, library_name=library.name)
         track_list.track_selected.connect(callback)
 
