@@ -61,4 +61,11 @@ When the remote-decks program is started, a temporary token is made for the read
 ### Headphone Logic
 Any client can play songs only locally to pre-listen. Those events are not sent to the other clients.
 
+## Extension idea: Time warp feature
+For connected live gigs, you would need an additional feature.
+
+* Measure the maxiumum latency between to (or more) clients and make that the "main latency"
+* receive all control events from the other machine(s)
+* Make a new control ("time warp") switch that changes whether your client is live/real-time or whether it is behind with the value of "main latency". Toggeling the switch will slowly (over a couple of seconds) strech the current track without listeners being able to notice ("transition time").
+* When one DJ hands over the control to another DJ, they click the "time warp" switch and their interface is partly frozen. After the "transition time", the other DJs interface is fully unlocked and their stream will be played real-time in their room and with "main latency" in the other room.
 
