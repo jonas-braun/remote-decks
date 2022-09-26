@@ -168,7 +168,7 @@ class Controller(QtCore.QObject):
     @QtCore.pyqtSlot()
     def update_vu_meter(self, deck):
 
-        value = self.engine.players[deck].loudness * 100
+        value = int(self.engine.players[deck].loudness * 100)
         self.ui.decks[deck].vu_meter.setValue(value)
 
 
